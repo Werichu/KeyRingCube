@@ -4,6 +4,7 @@
 #include <vector> // inclusion de arreglos inteligentes
 #include <memory> // inclusion de memoria dinamica inteligente
 #include <string>
+#include <iomanip> // para crear salidas de datos bien formadas
 #include "misc.h"
 #include "Contrasenia.h"
 
@@ -43,7 +44,7 @@ void menu(){
         case BUSCAR: cout<<"En construccion....\n"; break;
         case GUARDAR: cout<<"En construccion....\n"; break;
         case CARGAR: cout<<"En construccion....\n"; break;
-        case SALIR: cout<<"En construccion....\n"; break;
+        case SALIR: break;
         default: cout<<"Error, Opcion invalida"<<endl;
             break;
     }
@@ -54,11 +55,12 @@ void menu(){
 }
 
 void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
-    static int id = 1;
+    static int id = 1; // al usar static al estar cambiendo entre funciones del programa el ultimo valor se mantiene,
+    // eso explica rl iterador final de la variable al final de la funcion
     std::string nombre, descripcion, password;
 
     cin.ignore();
-    cout<<"Digite su asunto: "; getline(cin,nombre);
+    cout<<"Digite el nombre de la clave a guardar: "; getline(cin,nombre);
     cout<<"Digite una descripcion: "; getline(cin,descripcion);
     cout<<"Digite la contrasenia a guardar: "<<endl; getline(cin,password);
 
@@ -71,23 +73,33 @@ void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     coleccion.push_back(std::move(lista)); // agrega datos al vector hacia el final de la coleccion es decir
     // alta que se registra, va al final de la coleccion
 
-    cout<<"Contrasenia guardade exitosamente con el ID: "<<id<<endl;
+    cout<<"Contrasenia guardada exitosamente con el ID: "<<id<<endl;
     id++; // la id o "numero de registro" empieza desde el 1
 }
 
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion){
-    cout<<"--------------------------------------------------------------------------\n";
+    cin.ignore();
+    cout<<std::string(80, '-')<<endl; // esto crea una cadena de 80 caracteres
     cout<<"\t\t\t\tMOSTRAR TODO\n";
-    cout<<"--------------------------------------------------------------------------\n";
-    cout<<"ID\t | \tNombre\t | \tDescripcion\t | \tContrasenia\t | \t\n";
-    cout<<"--------------------------------------------------------------------------\n\n";
-    cout<<"En proceso..................";
+    cout<<std::string(80, '-')<<endl;
+    // configuracion de los anchos de la columna
+    cout<<std::left; // con esto todos los datos se alinean a la izquierda
+    cout<<std::setw(8)<<"ID" // "setw()" reserva un numero de estacios para el siguiente elemento, se alinea a la derecha por defecto
+        <<std::setw(20)<<"Nombre"
+        <<std::setw(25)<<"Descripcion"
+        <<std::setw(20)<<"Contrasenia"<<endl;
+    cout<<std::string(80, '-')<<endl;
+
     for(size_t i = 0; i < coleccion.size(); i++ ){
-        break;
+        cout<<std::setw(8)<<coleccion[i]->dameId()
+            <<std::setw(20)<<coleccion[i]->dameNombre()
+            <<std::setw(25)<<coleccion[i]->dameDescripcion()
+            <<std::setw(20)<<coleccion[i]->damePassword()<<endl;
     }
     /*"size_t" es un tipo de dato especial para indices, este por ningun motivo puede iterar con numeros negativos
       "coleccion.size()": el bucle va a iterar dependiendo hasta que numero de elementos tenga registrados en mi objeto
         */
+    cout<<std::string(80, '-')<<endl;
 }
 
 
