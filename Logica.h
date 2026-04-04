@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector> // inclusion de arreglos inteligentes
 #include <memory> // inclusion de memoria dinamica inteligente
-#include <string>
+#include <string> // libreria para la manipulacion de cadenas
 #include <iomanip> // para crear salidas de datos bien formadas
 #include "misc.h"
 #include "Contrasenia.h"
@@ -11,12 +11,13 @@
 using std::cin, std::cout, std::endl;
 
 std::vector<std::unique_ptr<contrasenia>> coleccion; /*esto crea una coleccion de objetos que crece en tiempo de ejecucion
-Es beneficioso ya que no sabemos cuantas contrasenias almacenara el usuario como tambien tenemos acceso al objeto a travez de punteros, tambien
+Es beneficioso ya que no sabemos cuantas contrasenias almacenara el usuario como tambien tenemos acceso al objeto a traves de punteros, tambien
 la memoria se liberara de forma automatica evitando fugas que puedan perjudicar o colapsos de programa en la ejecucion en vivo
 */
 
 
 // prototipos de funcion
+void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 
@@ -36,12 +37,13 @@ void menu(){
     cout<<"[0] Salir"<<endl;
     cout<<"Opcion: "; cin>>opc;
 
+    /*En este switch invocamos a las funciones que son parte del programa principal*/
     switch(opc){
         case ALTA: Alta(coleccion); break;
         case BAJA:  cout<<"En construccion....\n"; break;
         case ACTUALIZAR: cout<<"En construccion....\n"; break;
         case MOSTRAR: mostrarTodo(coleccion); break;
-        case BUSCAR: cout<<"En construccion....\n"; break;
+        case BUSCAR: Buscar(coleccion); break;
         case GUARDAR: cout<<"En construccion....\n"; break;
         case CARGAR: cout<<"En construccion....\n"; break;
         case SALIR: break;
@@ -72,35 +74,81 @@ void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
 
     coleccion.push_back(std::move(lista)); // agrega datos al vector hacia el final de la coleccion es decir
     // alta que se registra, va al final de la coleccion
+    // la funcion "push_back" se encarga de mover los elementos al final de la coleccion
 
     cout<<"Contrasenia guardada exitosamente con el ID: "<<id<<endl;
     id++; // la id o "numero de registro" empieza desde el 1
 }
 
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion){
-    cin.ignore();
-    cout<<std::string(80, '-')<<endl; // esto crea una cadena de 80 caracteres
+    cin.ignore();// eliminar salto de linea
+
+    if(coleccionVacia(coleccion)){ // si la coleccion de contrasenias esta vacia mostrara un mensaje y se retornara al menu
+        return; // la funcion condicional se encuantra en el archivo "misc.h"
+    }
+
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl; // esto crea una cadena de 80 caracteres
     cout<<"\t\t\t\tMOSTRAR TODO\n";
-    cout<<std::string(80, '-')<<endl;
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
     // configuracion de los anchos de la columna
     cout<<std::left; // con esto todos los datos se alinean a la izquierda
-    cout<<std::setw(8)<<"ID" // "setw()" reserva un numero de estacios para el siguiente elemento, se alinea a la derecha por defecto
-        <<std::setw(20)<<"Nombre"
-        <<std::setw(25)<<"Descripcion"
-        <<std::setw(20)<<"Contrasenia"<<endl;
-    cout<<std::string(80, '-')<<endl;
-
-    for(size_t i = 0; i < coleccion.size(); i++ ){
-        cout<<std::setw(8)<<coleccion[i]->dameId()
-            <<std::setw(20)<<coleccion[i]->dameNombre()
-            <<std::setw(25)<<coleccion[i]->dameDescripcion()
-            <<std::setw(20)<<coleccion[i]->damePassword()<<endl;
+    cout<<std::setw(MAX_ID)<<"ID" /*"setw()" reserva un numero de estacios para el siguiente elemento, se alinea a la derecha por defecto
+    usa las variables contantes "MAX" en el archivo "misc.h" como numero de caracteres reservados para la creacion de la tabla*/
+        <<std::setw(MAX_NOMBRE)<<"Nombre"
+        <<std::setw(MAX_DESCRIPCION)<<"Descripcion"
+        <<std::setw(MAX_CONTRASENIA)<<"Contrasenia"<<endl;
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    // la variable "i" se usa como iterador dentro del ciclo for
+    for(size_t i=0; i<coleccion.size(); i++ ){
+        cout<<std::setw(MAX_ID)<<coleccion[i]->dameId()
+            <<std::setw(MAX_NOMBRE)<<coleccion[i]->dameNombre()
+            <<std::setw(MAX_DESCRIPCION)<<coleccion[i]->dameDescripcion()
+            <<std::setw(MAX_CONTRASENIA)<<coleccion[i]->damePassword()<<endl;
     }
     /*"size_t" es un tipo de dato especial para indices, este por ningun motivo puede iterar con numeros negativos
       "coleccion.size()": el bucle va a iterar dependiendo hasta que numero de elementos tenga registrados en mi objeto
         */
-    cout<<std::string(80, '-')<<endl;
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
 }
 
+void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
+    cin.ignore(); // eliminar salto de linea
+
+    int id; // variable auxiliar utilizada para buscar dentro de la coleccion del objeto
+
+    if(coleccionVacia(coleccion)){ // si la coleccion de contrasenias esta vacia mostrara un mensaje y se retornara al menu
+        return; // la funcion condicional se encuantra en el archivo "misc.h"
+    }
+ // Caso contrario el programa te pedira que digites la id a buscar y mostrara los resultados de la busqueda
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    cout<<"\t\t\t\tBUSCAR\n";
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    cout<<"Digite una id a buscar: "; cin>>id;
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    cout<<std::left;
+    cout<<std::setw(MAX_ID)<<"ID"
+        <<std::setw(MAX_NOMBRE)<<"Nombre"
+        <<std::setw(MAX_DESCRIPCION)<<"Descripcion"
+        <<std::setw(MAX_CONTRASENIA)<<"Contrasenia"<<endl;
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+
+    // La variable "i" se usa como iterador dentro del ciclo for
+    for(size_t i=0; i<coleccion.size(); i++){
+    /* Si el usuario digito una id que esta dentro de la iteracion de la coleccion, entonces se mostraran todos los datos al usuario
+    sobre ese registro*/
+        if(id == coleccion[i]->dameId()){
+            cout<<std::setw(MAX_ID)<<coleccion[i]->dameId()
+                <<std::setw(MAX_NOMBRE)<<coleccion[i]->dameNombre()
+                <<std::setw(MAX_DESCRIPCION)<<coleccion[i]->dameDescripcion()
+                <<std::setw(MAX_CONTRASENIA)<<coleccion[i]->damePassword()<<endl;
+        }else{
+            cout<<"Error, la id digitada no existe"<<endl;
+        }
+    }
+    /*"size_t" es un tipo de dato especial para indices, este por ningun motivo puede iterar con numeros negativos
+    "coleccion.size()": el bucle va a iterar dependiendo hasta que numero de elementos tenga registrados en mi objeto
+    */
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+}
 
 #endif // LOGICA_H_INCLUDED
