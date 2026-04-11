@@ -17,10 +17,10 @@ la memoria se liberara de forma automatica evitando fugas que puedan perjudicar 
 
 
 // prototipos de funcion
-void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion);
+void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion);
-
+void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 
 // Esta funcion se encarga de gestionar el menu de la aplicacion
 void menu(){
@@ -39,11 +39,11 @@ void menu(){
 
     /*En este switch invocamos a las funciones que son parte del programa principal*/
     switch(opc){
-        case ALTA: Alta(coleccion); break;
+        case ALTA:       Alta(coleccion); break;
         case BAJA:  cout<<"En construccion....\n"; break;
-        case ACTUALIZAR: cout<<"En construccion....\n"; break;
-        case MOSTRAR: mostrarTodo(coleccion); break;
-        case BUSCAR: Buscar(coleccion); break;
+        case ACTUALIZAR: Actualizar(coleccion); break;
+        case MOSTRAR:    mostrarTodo(coleccion); break;
+        case BUSCAR:     Buscar(coleccion); break;
         case GUARDAR: cout<<"En construccion....\n"; break;
         case CARGAR: cout<<"En construccion....\n"; break;
         case SALIR: break;
@@ -59,7 +59,7 @@ void menu(){
 void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     static int id = 1; // al usar static al estar cambiendo entre funciones del programa el ultimo valor se mantiene,
     // eso explica rl iterador final de la variable al final de la funcion
-    std::string nombre, descripcion, password;
+    std::string nombre, descripcion, password; // variables auxiliares para almacenar datos del usuario
 
     cin.ignore();
     cout<<"Digite el nombre de la clave a guardar: "; getline(cin,nombre);
@@ -78,6 +78,63 @@ void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
 
     cout<<"Contrasenia guardada exitosamente con el ID: "<<id<<endl;
     id++; // la id o "numero de registro" empieza desde el 1
+}
+
+void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
+    cin.ignore(); //eliminar salto de linea
+    std::string nuevoNombre, nuevaDescripcion, nuevaPassword; // variables auxiliares para almacenar datos del usuario
+    int id; // variable auxiliar utilizada para buscar dentro de la coleccion del objeto
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    cout<<"\t\t\t\tACTUALIZAR DATOS\n";
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+
+    if(coleccionVacia(coleccion)){
+        return;
+    }
+
+    cout<<"Digite el numero de la id a buscar: "; cin>>id;
+    cin.ignore();
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    cout<<std::left;
+    cout<<std::setw(MAX_ID)<<"ID"
+        <<std::setw(MAX_NOMBRE)<<"Nombre"
+        <<std::setw(MAX_DESCRIPCION)<<"Descripcion"
+        <<std::setw(MAX_CONTRASENIA)<<"Contrasenia"<<endl;
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    // La variable "i" se usa como iterador dentro del ciclo for
+    for(size_t i=0; i<coleccion.size(); i++){
+    /* Si el usuario digito una id que esta dentro de la iteracion de la coleccion, entonces se mostraran todos los datos al usuario
+    sobre ese registro*/
+        if(id == coleccion[i]->dameId()){
+            cout<<std::setw(MAX_ID)<<coleccion[i]->dameId()
+                <<std::setw(MAX_NOMBRE)<<coleccion[i]->dameNombre()
+                <<std::setw(MAX_DESCRIPCION)<<coleccion[i]->dameDescripcion()
+                <<std::setw(MAX_CONTRASENIA)<<coleccion[i]->damePassword()<<endl;
+
+                cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+                cout<<"Digite un nuevo nombre: "; getline(cin,nuevoNombre);
+                cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+                cout<<"Digite una nueva descripcion: "; getline(cin,nuevaDescripcion);
+                cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+                cout<<"Digite una nueva contrasenia: "; getline(cin,nuevaPassword);
+                cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+
+                coleccion[i]->fijaNombre(nuevoNombre);
+                coleccion[i]->fijaDescripcion(nuevaDescripcion);
+                coleccion[i]->fijaPassword(nuevaPassword);
+
+                cout<<"Datos actualizados......."<<endl;
+        }else{
+            cout<<"Error, la id digitada no existe"<<endl;
+        }
+    }
+    /*"size_t" es un tipo de dato especial para indices, este por ningun motivo puede iterar con numeros negativos
+    "coleccion.size()": el bucle va a iterar dependiendo hasta que numero de elementos tenga registrados en mi objeto
+    */
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+
+
+
 }
 
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion){
@@ -123,7 +180,7 @@ void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
     cout<<"\t\t\t\tBUSCAR\n";
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
-    cout<<"Digite una id a buscar: "; cin>>id;
+    cout<<"Digite el numero de id a buscar: "; cin>>id;
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
     cout<<std::left;
     cout<<std::setw(MAX_ID)<<"ID"
