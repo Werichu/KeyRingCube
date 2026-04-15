@@ -18,6 +18,7 @@ la memoria se liberara de forma automatica evitando fugas que puedan perjudicar 
 
 // prototipos de funcion
 void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion);
+void Baja(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
@@ -39,11 +40,11 @@ void menu(){
 
     /*En este switch invocamos a las funciones que son parte del programa principal*/
     switch(opc){
-        case ALTA:       Alta(coleccion); break;
-        case BAJA:  cout<<"En construccion....\n"; break;
-        case ACTUALIZAR: Actualizar(coleccion); break;
+        case ALTA:       Alta(coleccion);        break;
+        case BAJA:       Baja(coleccion);        break;
+        case ACTUALIZAR: Actualizar(coleccion);  break;
         case MOSTRAR:    mostrarTodo(coleccion); break;
-        case BUSCAR:     Buscar(coleccion); break;
+        case BUSCAR:     Buscar(coleccion);      break;
         case GUARDAR: cout<<"En construccion....\n"; break;
         case CARGAR: cout<<"En construccion....\n"; break;
         case SALIR: break;
@@ -80,10 +81,72 @@ void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     id++; // la id o "numero de registro" empieza desde el 1
 }
 
+void Baja(std::vector<std::unique_ptr<contrasenia>>& coleccion){
+    cin.ignore(); // eliminamos salto de linea
+    int idEliminar; // variable auxiliar utilizada para buscar la contrasenia a eliminar
+    char confirmar; // Esta variable guarda decision del usuario al momento de querer eliminar una contrasenia (S/N)
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    cout<<"\t\t\t\tELIMINAR CONTRASENIAS\n";
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+
+    if(coleccionVacia(coleccion)){
+        return;
+    }
+
+    idEliminar = leerEntero("Digite la id a eliminar: "); // el usuario digita su id
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    cout<<std::left;
+    cout<<std::setw(MAX_ID)<<"ID"
+        <<std::setw(MAX_NOMBRE)<<"Nombre"
+        <<std::setw(MAX_DESCRIPCION)<<"Descripcion"
+        <<std::setw(MAX_CONTRASENIA)<<"Contrasenia"<<endl;
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+
+    bool encontrado = false;
+    for(size_t i=0; i<coleccion.size(); i++){
+        if(idEliminar == coleccion[i]->dameId()){
+        encontrado = true;
+            cout<<std::setw(MAX_ID)<<coleccion[i]->dameId()
+                <<std::setw(MAX_NOMBRE)<<coleccion[i]->dameNombre()
+                <<std::setw(MAX_DESCRIPCION)<<coleccion[i]->dameDescripcion()
+                <<std::setw(MAX_CONTRASENIA)<<coleccion[i]->damePassword()<<endl;
+            cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+
+                cout<<"¿Desea eliminar estos datos? (S/n): ";
+                cin>>confirmar;
+                if(confirmar == 'S' || confirmar == 's'){
+                    coleccion.erase(coleccion.begin() + i);
+    /*Explicacion de "coleccion.erase(coleccion.begin() + i)":
+        Supongamos que tenemos un vector de letras:
+        Vector = [A,B,C,D,E]
+    Posiciones->  0 1 2 3 4
+
+    Ahora bien, queremos borrar la letra C del vector, digitamos la funcion ".erase()" para borrar algo de dicho vector,
+    despues dentro de la funcion usamos el argumento ".begin() + 2" para indicar que debemos iniciar desde el principio
+    del vector + 2 que seria la posicion que queremos eliminar dentro de este vector, al mismo tiempo, las posiciones se
+    recorreran automaticamente evitando fugas de memoria
+
+    El caso de la variable "i" es que cuando se digite una id por el usuario esta sera una copia de la posicion dentro del vector
+    por lo cual se iterara hasta esa posicion y se eliminara ese espacio.
+    */
+                    cout<<"Contrasenia eliminada\n";
+                }else{
+                    cout<<"Eliminacion cancelada\n";
+                }
+        }else{
+            cout<<"Error, la id digitada no existe"<<endl;
+        }
+    }
+    cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    if(!encontrado){
+        cout<<"Error, no existe una id con el numero "<<idEliminar;
+    }
+}
+
 void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     cin.ignore(); //eliminar salto de linea
     std::string nuevoNombre, nuevaDescripcion, nuevaPassword; // variables auxiliares para almacenar datos del usuario
-    int id; // variable auxiliar utilizada para buscar dentro de la coleccion del objeto
+    int idActualizar; // variable auxiliar utilizada para buscar dentro de la coleccion del objeto
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
     cout<<"\t\t\t\tACTUALIZAR DATOS\n";
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
@@ -92,8 +155,7 @@ void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
         return;
     }
 
-    cout<<"Digite el numero de la id a buscar: "; cin>>id;
-    cin.ignore();
+    idActualizar = leerEntero("Digite el numero de la id a modificar: ");
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
     cout<<std::left;
     cout<<std::setw(MAX_ID)<<"ID"
@@ -102,10 +164,12 @@ void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
         <<std::setw(MAX_CONTRASENIA)<<"Contrasenia"<<endl;
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
     // La variable "i" se usa como iterador dentro del ciclo for
+    bool encontrado=false;
     for(size_t i=0; i<coleccion.size(); i++){
     /* Si el usuario digito una id que esta dentro de la iteracion de la coleccion, entonces se mostraran todos los datos al usuario
     sobre ese registro*/
-        if(id == coleccion[i]->dameId()){
+        if(idActualizar == coleccion[i]->dameId()){
+            encontrado=true;
             cout<<std::setw(MAX_ID)<<coleccion[i]->dameId()
                 <<std::setw(MAX_NOMBRE)<<coleccion[i]->dameNombre()
                 <<std::setw(MAX_DESCRIPCION)<<coleccion[i]->dameDescripcion()
@@ -132,9 +196,9 @@ void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     "coleccion.size()": el bucle va a iterar dependiendo hasta que numero de elementos tenga registrados en mi objeto
     */
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
-
-
-
+        if(!encontrado){
+        cout<<"Error, no existe una id con el numero "<<idActualizar;
+    }
 }
 
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion){
@@ -171,7 +235,7 @@ void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion){
 void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     cin.ignore(); // eliminar salto de linea
 
-    int id; // variable auxiliar utilizada para buscar dentro de la coleccion del objeto
+    int idBuscar; // variable auxiliar utilizada para buscar dentro de la coleccion del objeto
 
     if(coleccionVacia(coleccion)){ // si la coleccion de contrasenias esta vacia mostrara un mensaje y se retornara al menu
         return; // la funcion condicional se encuantra en el archivo "misc.h"
@@ -180,7 +244,7 @@ void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
     cout<<"\t\t\t\tBUSCAR\n";
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
-    cout<<"Digite el numero de id a buscar: "; cin>>id;
+    idBuscar = leerEntero("Digite la id a buscar: ");
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
     cout<<std::left;
     cout<<std::setw(MAX_ID)<<"ID"
@@ -190,10 +254,12 @@ void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
 
     // La variable "i" se usa como iterador dentro del ciclo for
+    bool encontrado=false;
     for(size_t i=0; i<coleccion.size(); i++){
     /* Si el usuario digito una id que esta dentro de la iteracion de la coleccion, entonces se mostraran todos los datos al usuario
     sobre ese registro*/
-        if(id == coleccion[i]->dameId()){
+        if(idBuscar == coleccion[i]->dameId()){
+        encontrado=true;
             cout<<std::setw(MAX_ID)<<coleccion[i]->dameId()
                 <<std::setw(MAX_NOMBRE)<<coleccion[i]->dameNombre()
                 <<std::setw(MAX_DESCRIPCION)<<coleccion[i]->dameDescripcion()
@@ -206,6 +272,9 @@ void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     "coleccion.size()": el bucle va a iterar dependiendo hasta que numero de elementos tenga registrados en mi objeto
     */
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
+    if(!encontrado){
+        cout<<"Error, no existe una id con el numero "<<idBuscar;
+    }
 }
 
 #endif // LOGICA_H_INCLUDED

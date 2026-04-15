@@ -1,5 +1,6 @@
 #ifndef MISC_H_INCLUDED
 #define MISC_H_INCLUDED
+#include <limits> // libreria para incluir limites a los tipos de datos
 //-----------------------------
 #define MAX_LARGO_TABLA 80
 #define MAX_ID 8
@@ -24,5 +25,26 @@ bool coleccionVacia (std::vector<std::unique_ptr<contrasenia>>& coleccion){
         return true;
     }
     return false;
+}
+
+//Esta funcion se utiliza en todas las funciones que tengan que ver con alguna busqueda mendiente ID
+int leerEntero(const std::string& mensaje){
+/*const std::string&: significa que siempre se va a recibir un mensaje por referencia constante, no se va a copiar
+    solo se va a leer
+*/
+
+    int valor;
+    cout<<mensaje;
+
+    while(!(cin>>valor)){ // mientras no se pueda leer unvalor entero
+        cout<<"Error, ingrese un numero valido"<<endl;
+        cin.clear(); // limpiamos el error
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // limpiamos el buffer
+        cout<<mensaje; // volvemos a pedir el mensaje
+    }
+
+    cin.ignore(); // limpiamos salto de linea
+
+    return valor; // si se ingresa un numero correctamente se retorna el valor
 }
 #endif // MISC_H_INCLUDED
