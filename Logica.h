@@ -25,7 +25,7 @@ void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 
 // Esta funcion se encarga de gestionar el menu de la aplicacion
 void menu(){
-    int opc; // variable que maneja las opciones del menu
+    int opcion; // variable que maneja las opciones del menu
     do{
     cout<<"=== KeyRingCube ==="<<endl;
     cout<<"[1] Alta "<<endl;
@@ -36,10 +36,10 @@ void menu(){
     cout<<"[6] Guardar datos"<<endl;
     cout<<"[7] Cargar datos"<<endl;
     cout<<"[0] Salir"<<endl;
-    cout<<"Opcion: "; cin>>opc;
+    opcion = leerEntero("Opcion: ");
 
     /*En este switch invocamos a las funciones que son parte del programa principal*/
-    switch(opc){
+    switch(opcion){
         case ALTA:       Alta(coleccion);        break;
         case BAJA:       Baja(coleccion);        break;
         case ACTUALIZAR: Actualizar(coleccion);  break;
@@ -52,7 +52,7 @@ void menu(){
             break;
     }
 
-    }while(opc!=SALIR);
+    }while(opcion!=SALIR);
     cout<<"Bytes!!!!!!";
 
 }
@@ -62,7 +62,6 @@ void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     // eso explica rl iterador final de la variable al final de la funcion
     std::string nombre, descripcion, password; // variables auxiliares para almacenar datos del usuario
 
-    cin.ignore();
     cout<<"Digite el nombre de la clave a guardar: "; getline(cin,nombre);
     cout<<"Digite una descripcion: "; getline(cin,descripcion);
     cout<<"Digite la contrasenia a guardar: "<<endl; getline(cin,password);
@@ -82,7 +81,6 @@ void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
 }
 
 void Baja(std::vector<std::unique_ptr<contrasenia>>& coleccion){
-    cin.ignore(); // eliminamos salto de linea
     int idEliminar; // variable auxiliar utilizada para buscar la contrasenia a eliminar
     char confirmar; // Esta variable guarda decision del usuario al momento de querer eliminar una contrasenia (S/N)
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
@@ -144,7 +142,6 @@ void Baja(std::vector<std::unique_ptr<contrasenia>>& coleccion){
 }
 
 void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
-    cin.ignore(); //eliminar salto de linea
     std::string nuevoNombre, nuevaDescripcion, nuevaPassword; // variables auxiliares para almacenar datos del usuario
     int idActualizar; // variable auxiliar utilizada para buscar dentro de la coleccion del objeto
     cout<<std::string(MAX_LARGO_TABLA, '-')<<endl;
@@ -202,8 +199,6 @@ void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
 }
 
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion){
-    cin.ignore();// eliminar salto de linea
-
     if(coleccionVacia(coleccion)){ // si la coleccion de contrasenias esta vacia mostrara un mensaje y se retornara al menu
         return; // la funcion condicional se encuantra en el archivo "misc.h"
     }
@@ -233,8 +228,6 @@ void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion){
 }
 
 void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
-    cin.ignore(); // eliminar salto de linea
-
     int idBuscar; // variable auxiliar utilizada para buscar dentro de la coleccion del objeto
 
     if(coleccionVacia(coleccion)){ // si la coleccion de contrasenias esta vacia mostrara un mensaje y se retornara al menu
