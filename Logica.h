@@ -5,6 +5,8 @@
 #include <memory> // inclusion de memoria dinamica inteligente
 #include <string> // libreria para la manipulacion de cadenas
 #include <iomanip> // para crear salidas de datos bien formadas
+#include <fstream> // para guardar en archivo
+#include <sstream> // manipulcion de cadenas de texto
 #include "misc.h"
 #include "Contrasenia.h"
 
@@ -22,6 +24,7 @@ void Baja(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
+void Guardar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 
 // Esta funcion se encarga de gestionar el menu de la aplicacion
 void menu(){
@@ -45,7 +48,7 @@ void menu(){
         case ACTUALIZAR: Actualizar(coleccion);  break;
         case MOSTRAR:    mostrarTodo(coleccion); break;
         case BUSCAR:     Buscar(coleccion);      break;
-        case GUARDAR: cout<<"En construccion....\n"; break;
+        case GUARDAR:    Guardar(coleccion);     break;
         case CARGAR: cout<<"En construccion....\n"; break;
         case SALIR: break;
         default: cout<<"Error, Opcion invalida"<<endl;
@@ -58,16 +61,16 @@ void menu(){
 }
 
 void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
-    static int id = 1; // al usar static al estar cambiendo entre funciones del programa el ultimo valor se mantiene,
-    // eso explica rl iterador final de la variable al final de la funcion
     std::string nombre, descripcion, password; // variables auxiliares para almacenar datos del usuario
+
+    int idNuevo = coleccion.size() + 1; // El id nuevo se asigna dependiendo el tamanio de arreglo actual
 
     cout<<"Digite el nombre de la clave a guardar: "; getline(cin,nombre);
     cout<<"Digite una descripcion: "; getline(cin,descripcion);
     cout<<"Digite la contrasenia a guardar: "<<endl; getline(cin,password);
 
     auto lista = std::make_unique<contrasenia>(); // creamos el objeto para agregar datos al vector dinamico
-    lista->fijaId(id);
+    lista->fijaId(idNuevo);
     lista->fijaNombre(nombre);
     lista->fijaDescripcion(descripcion);
     lista->fijaPassword(password);
@@ -76,8 +79,7 @@ void Alta(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     // alta que se registra, va al final de la coleccion
     // la funcion "push_back" se encarga de mover los elementos al final de la coleccion
 
-    cout<<"Contrasenia guardada exitosamente con el ID: "<<id<<endl;
-    id++; // la id o "numero de registro" empieza desde el 1
+    cout<<"Contrasenia guardada exitosamente con el ID: "<<idNuevo<<endl;
 }
 
 void Baja(std::vector<std::unique_ptr<contrasenia>>& coleccion){
@@ -270,4 +272,27 @@ void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     }
 }
 
+void Guardar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
+
+    std::ofstream archivo("contrasenias.txt"); // Abrir archivo
+
+    if(!archivo.is_open()){
+        cout<<"Error al abrir el archivo"<<endl;
+        return;
+    }
+    /*Como el usuario ya tiene una cantidad delimitada de contrasenias ya registradas por eso es mejor
+    usar esta nomenclatura en el ciclo for y usamos el paso de referencia para iterar en base a lo ya registrado previamente
+    evitando iteraciones extras.
+    */
+    for(const auto& c : coleccion){
+        archivo<<c->dameId()<<"|"
+               <<c->dameNombre()<<"|"
+               <<c->dameDescripcion()<<"|"
+               <<c->damePassword()<<"\n";
+    }
+
+    archivo.close();
+    cout<<"Datos guardados correctamente"<<endl;
+    cout<<"Se guardaron "<<coleccion.size()<<" contrasenias....."<<endl;
+}
 #endif // LOGICA_H_INCLUDED
