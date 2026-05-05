@@ -25,6 +25,7 @@ void Actualizar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void mostrarTodo(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void Buscar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 void Guardar(std::vector<std::unique_ptr<contrasenia>>& coleccion);
+void cargarArchivo(std::vector<std::unique_ptr<contrasenia>>& coleccion);
 
 // Esta funcion se encarga de gestionar el menu de la aplicacion
 void menu(){
@@ -49,7 +50,7 @@ void menu(){
         case MOSTRAR:    mostrarTodo(coleccion); break;
         case BUSCAR:     Buscar(coleccion);      break;
         case GUARDAR:    Guardar(coleccion);     break;
-        case CARGAR: cout<<"En construccion....\n"; break;
+        case CARGAR:     cargarArchivo(coleccion); break;
         case SALIR: break;
         default: cout<<"Error, Opcion invalida"<<endl;
             break;
@@ -294,5 +295,51 @@ void Guardar(std::vector<std::unique_ptr<contrasenia>>& coleccion){
     archivo.close();
     cout<<"Datos guardados correctamente"<<endl;
     cout<<"Se guardaron "<<coleccion.size()<<" contrasenias....."<<endl;
+}
+
+void cargarArchivo(std::vector<std::unique_ptr<contrasenia>>& coleccion){
+    std::string linea;
+    int contador = 0;
+
+    std::ifstream archivo("contrasenias.txt"); // abriendo el archivo en modo lectura
+
+    if(!archivo.is_open()){
+        cout<<"Error al abrir el archivo"<<endl;
+        return;
+    }
+
+    //limpia la coleccion actual de elementos agregados antes de cargar el archivo
+    coleccion.clear();
+
+    while(std::getline(archivo, linea)){
+        std::stringstream ss(linea); // se crego esta variable para extraer "|" del archivo
+        std::string id_str,nombre,descripcion, password;
+
+        std::getline(ss,id_str,'|');
+        std::getline(ss,nombre,'|');
+        std::getline(ss,descripcion,'|');
+        std::getline(ss,password,'|');
+
+        //convertir el id string a numero entero
+        int id = std::stoi(id_str);
+
+        //creamos el objeto que guarda una contrasenia
+        auto lista = std::make_unique<contrasenia>();
+
+        //uso los setters para cargar valores
+
+        lista->fijaId(id);
+        lista->fijaNombre(nombre);
+        lista->fijaDescripcion(descripcion);
+        lista->fijaPassword(password);
+
+        // se agrega a la coleccion
+        coleccion.push_back(std::move(lista));
+        contador++;
+    }
+
+    archivo.close();
+    cout<<"Datos cargados correctamente"<<endl;
+    cout<<"Se cargaron "<<contador<<" datos....."<<endl;
 }
 #endif // LOGICA_H_INCLUDED
